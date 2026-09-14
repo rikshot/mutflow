@@ -1,4 +1,8 @@
 # Changelog
+## [Unreleased]
+### Fixed
+- Instrumenting a long `&&`/`||` chain no longer grows exponentially. The chain is left-associative, so each level's condition is the whole instrumented chain beneath it, and the `&&`/`||` swap copied that condition into its variant while the else branch kept the original: every level doubled the levels below. Ten comparisons in a hand-written `equals` failed the build with `MethodTooLargeException`; sixteen ran the compiler out of memory. The condition is now evaluated once into a temporary, which keeps the operand order and makes the instrumented size linear.
+
 ## [1.2.2] - 2026-09-10
 ### Fixed
 - Boolean inversion no longer mutates calls whose result is discarded (`list.add(x)` as a statement). Inverting an unused value is an equivalent mutant that no test can kill; in a run over 652 mutants these accounted for every "ignored" verdict. The inner expressions of such a call are still mutated (`rows.add(x > 0)` keeps its `>` mutations). (#21)
